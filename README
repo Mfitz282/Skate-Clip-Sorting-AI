@@ -1,0 +1,11 @@
+BACKGROUND
+
+This project was an excuse for me to learn a bit about machine learning models and try and apply some of the basics to 'solve' a real world problem. 
+
+I've been filming a lot of skateboarding over the summer and in a typical session I may end up with 50 to 100 short clips where only 5 of which the skater will land the trick. Thus I decided what if I created an AI model to classify clips into two different categories:
+
+'Make' the skater lands the trick
+
+'Bail' the skater doesn't land the trick
+
+This should then speed up the footage review process. 

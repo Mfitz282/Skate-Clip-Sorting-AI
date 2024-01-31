@@ -5,13 +5,19 @@ Created on Sat Dec 30 16:56:22 2023
 
 @author: mfitzpatrick
 """
-
+import matplotlib.pyplot as plt
 import tensorflow as tf
 import os
 import cv2
 import numpy as np
 import tqdm
 from sklearn.preprocessing import LabelBinarizer
+
+#set the random seed to be constant in order to maintain reproduceability and consistency when
+#looking at the effects of 'improving' the model
+random_seed = 1
+tf.random.set_seed(random_seed)
+np.random.seed(random_seed)
 
 #location for the skate clips
 BASE_PATH = '/Users/mfitzpatrick/Documents/Data Science/Skateboard Model/skateboard_model/data'
@@ -27,6 +33,12 @@ def frame_generator():
 
     #iterate through all files in the video_paths list 
     for video_path in video_paths:
+        #check to see if the relevant .npy file already exists
+        npy_path = video_path.replace('.MP4', '.npy')
+        if os.path.exists(npy_path):
+            print(f"Skipping viedo: {video_path}, corresponding .npy file already exists." )
+            continue
+        
         print(f"Processing video: {video_path}")
         #open the video in cv2
         cap = cv2.VideoCapture(video_path)
@@ -184,5 +196,23 @@ valid_dataset = tf.data.Dataset.from_generator(make_generator(test_list),
 valid_dataset = valid_dataset.batch(16).prefetch(tf.data.experimental.AUTOTUNE)
 
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir='log', update_freq=1000)
-model.fit(train_dataset, epochs=17, callbacks=[tensorboard_callback], validation_data=valid_dataset)
+history = model.fit(train_dataset, epochs=10, callbacks=[tensorboard_callback], validation_data=valid_dataset)
 
+
+# Plot training and validation loss over epochs
+plt.subplot(2, 1, 1)
+plt.plot(history.history['loss'], label='Training Loss')
+plt.plot(history.history['val_loss'], label='Validation Loss')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.legend()
+
+plt.subplot(2, 1, 2)
+plt.plot(history.history['accuracy'], label='Training Accuracy')
+plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy')
+plt.legend()
+
+plt.tight_layout()
+plt.show()
